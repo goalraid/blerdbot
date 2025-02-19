@@ -32,7 +32,7 @@ function init() {
     const loader = new GLTFLoader();
     loader.register((parser) => new VRMLoaderPlugin(parser));
 
-    const modelUrl = 'https://tubular-druid-925b4b.netlify.app/models/Brianna_model.vrm';
+    const modelUrl = '/models/Brianna_model.vrm';
     loader.load(modelUrl, 
         (gltf) => {
             const vrm = gltf.userData.vrm;
