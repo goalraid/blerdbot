@@ -48,7 +48,7 @@
             const loader = new GLTFLoader();
             loader.register((parser) => new VRMLoaderPlugin(parser));
 
-            const modelUrl = 'https://your-netlify-site.netlify.app/models/your-model.vrm';
+            const modelUrl = 'https://tubular-druid-925b4b.netlify.app/models/Brianna_model.vrm';
             loader.load(modelUrl, (gltf) => {
                 const vrm = gltf.userData.vrm;
                 scene.add(vrm.scene);
