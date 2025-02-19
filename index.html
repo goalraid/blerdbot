@@ -1,24 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VRM Model Viewer</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VRM Model with Three.js on Netlify</title>
     <style>
-        body { margin: 0; }
-        canvas { display: block; }
-    </style>
-</head>
-<body>
-    <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/",
-        "@pixiv/three-vrm": "https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3/lib/three-vrm.module.min.js"
+      body {
+        margin: 0;
       }
-    }
+      canvas {
+        display: block;
+      }
+    </style>
+    <!-- Import dependencies via CDN as shown in the pixiv/three-vrm docs -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/",
+          "@pixiv/three-vrm": "https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3/lib/three-vrm.module.min.js"
+        }
+      }
     </script>
-    <script type="module" src="script.js"></script>
-</body>
+  </head>
+  <body>
+    <script type="module">
+      import * as THREE from 'three';
+      import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+      import { VRMLoaderPlugin } from '@pixiv/three-vrm';  // Import the VRM loader plugin
+
+      // Set up the scene, camera, and renderer
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        45,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        100
+      );
+      camera.position.set(0, 1.6, 3);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      // Add basic ambient and directional lights to the scene
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight.position.set(0, 1, 1);
+      scene.add(directionalLight);
+
+      // Create a GLTFLoader instance
+      const loader = new GLTFLoader();
+
+      // Register the VRMLoaderPlugin as per pixiv/three-vrm documentation
+      loader.register((parser) => new VRMLoaderPlugin(parser));
+
+      // Load the VRM file located in the "models" folder in your repository’s public directory
+      loader.load(
+        '/models/VRM1_Constraint_Twist_Sample.vrm',
+        (gltf) => {
+          // Access the VRM instance from the loaded glTF data
+          const vrm = gltf.userData.vrm;
+          scene.add(vrm.scene);
+          console.log('VRM loaded successfully:', vrm);
+        },
+        (progress) => {
+          console.log('Loading model...', Math.round(100 * (progress.loaded / progress.total)), '%');
+        },
+        (error) => {
+          console.error('Error loading VRM model:', error);
+        }
+      );
+
+      // Handle resizing of the window
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      // Animation loop
+      function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+      animate();
+    </script>
+  </body>
 </html>
